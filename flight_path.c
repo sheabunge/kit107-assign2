@@ -112,9 +112,9 @@ char *locate(flight_path path, char *name) {
 /**
  * Return the name of the next waypoint in the flight path.
  * Generates an error if the flight path is empty.
- * @param  path    the flight path
- * @param  holding if true, return the value of the current waypoint instead of the next one
- * @return         the name of the next waypoint
+ * @param  path     the flight path
+ * @param  holding  if true, return the value of the current waypoint instead of the next one
+ * @return          the name of the next waypoint
  */
 char *heading(flight_path path, bool holding) {
 	list_node node; // used to store the node where the desired waypoint name is stored
@@ -156,18 +156,39 @@ int remaining(flight_path path, char *name, bool onwards) {
 	list_node current;  // current node in traversal
 	waypoint point;     // waypoint value of current node
 
-	count = 0;
-	current = path->current;
+	/* If onwards, begin at the current node and count until the target node is reached
+	 * Otherwise, search for the target node to begin at, and then count up to the current node */
+	current = onwards ? path->current : path->origin;
 	point = get_waypoint(current);
 
+	count = 0;
+
+	/* Traverse the list until the target waypoint is reached */
 	while (get_next_node(current) != NULL && strcmp(name, get_name(point)) != 0) {
 		current = get_next_node(current);
 		point = get_waypoint(current);
 		count++;
 	}
 
+	/* Check whether the end of the list was reached without finding the target waypoint. If so, discard the count */
 	if (strcmp(name, get_name(point)) != 0) {
+		count = -1;
+
+	} else if (! onwards) {
+		/* If onwards, then count is correct (from the current point to the target)
+		 * Otherwise, we need to count from the target point, which we are now on, to the current flight path pointer */
 		count = 0;
+
+		/* Keep traversing the list until the end is reached or we find the current point */
+		while (get_next_node(current) != NULL && current != path->current) {
+			current = get_next_node(current);
+			count++;
+		}
+
+		/* Determine whether the end of the list was reached without discovering the current point. If so, discard the count */
+		if (current != path->current) {
+			count = -1;
+		}
 	}
 
 	return count;
