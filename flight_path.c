@@ -25,16 +25,20 @@ struct flight_path_int {
  * @param destination  the destination waypoint to become the final waypoint in the flight path
  */
 void init_flight_path(flight_path *path, waypoint origin, waypoint destination) {
+	list_node origin_node;      // node object for the origin point
+	list_node destination_node; // node object for the destination point
+
 	/* Allocate memory to store the struct */
 	*path = (flight_path) malloc(sizeof(struct flight_path_int));
 
-	/* Set the initial values of the struct properties to NULL as no elements have been added yet */
-	(*path)->origin = NULL;
-	(*path)->current = NULL;
+	/* Create nodes for the origin and destination */
+	init_node(&origin_node, origin);
+	init_node(&destination_node, destination);
 
-	/* Add the origin and destination points as the first points in the flight path */
-	add_next(*path, origin);
-	add_next(*path, destination);
+	/* Initialise the flight path using the new nodes */
+	set_next_node(origin_node, destination_node);
+	(*path)->origin = origin_node;
+	(*path)->current = origin_node;
 }
 
 /**
@@ -47,7 +51,8 @@ bool is_path_empty(flight_path path) {
 }
 
 /**
- * Add an interim waypoint to the end of the flight path
+ * Add an interim waypoint to the end of the flight path.
+ * An error is generated if the flight path is empty.
  * @param path     the flight path to modify
  * @param interim  the waypoint to insert into the flight path
  */
@@ -55,11 +60,9 @@ void add_next(flight_path path, waypoint interim) {
 	list_node node; // the node to insert into the flight path
 	init_node(&node, interim);
 
-	/* If the path is empty, add the new node as the origin, and set it as the current node */
-	if (path->origin == NULL) {
-		path->origin = node;
-		path->current = node;
-
+	/* Ensure the path is not empty */
+	if (is_path_empty(path)) {
+		fprintf(stderr, "Cannot add an interim waypoint to an empty flight path.");
 	} else {
 
 		/* Link the node after the current node to be after the new node */
@@ -107,23 +110,38 @@ char *locate(flight_path path, char *name) {
 }
 
 /**
- * Return the name of the next waypoint in the flight path
+ * Return the name of the next waypoint in the flight path.
+ * Generates an error if the flight path is empty.
  * @param  path    the flight path
  * @param  holding if true, return the value of the current waypoint instead of the next one
  * @return         the name of the next waypoint
  */
 char *heading(flight_path path, bool holding) {
 	list_node node; // used to store the node where the desired waypoint name is stored
+	char *result;   // used to store the resulting heading - either the name of a waypoint, or an empty string
 
-	/* If the flight is holding or the we are at the destination (end of the path), use the current node */
-	if (holding || get_next_node(path->current) == NULL) {
-		node = path->current;
+	if (is_path_empty(path)) {
+
+		/* Ensure that the flight path is not empty, and print an error if so */
+		fprintf(stderr, "Cannot retrieve the heading from an empty flight path");
+		result = "";
+
 	} else {
-		/* Otherwise, retrieve the next node */
-		node = get_next_node(path->current);
+
+		/* If the flight is holding or the we are at the destination (end of the path), use the current node */
+		if (holding || get_next_node(path->current) == NULL) {
+			node = path->current;
+
+		} else {
+
+			/* Otherwise, retrieve the next node */
+			node = get_next_node(path->current);
+		}
+
+		result = get_name(get_waypoint(node));
 	}
 
-	return get_name(get_waypoint(node));
+	return result;
 }
 
 /**
@@ -164,7 +182,7 @@ void skip(flight_path path) {
 
 	/* If there are no points in the flight path, print a message to the error stream */
 	if (is_path_empty(path)) {
-		fprintf(stderr, "the flight path is empty");
+		fprintf(stderr, "Cannot remove a waypoint from an empty flight path.");
 	} else {
 
 		/* Retrieve the next node in the flight path */
