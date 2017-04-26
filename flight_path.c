@@ -164,27 +164,7 @@ void reverse(flight_path path) {
 		current = next;
 	}
 
+	/* Set the beginning of the list to be the final node which was traversed
+	 * i.e. what was previously the end of the list */
 	path->origin = prev;
-}
-
-void print_path(flight_path path) {
-	list_node current;
-
-	current = path->origin;
-
-	while (current != NULL) {
-		if (current == path->current) {
-			printf("*%s*", get_name(get_waypoint(current)));
-		} else {
-			printf("%s", get_name(get_waypoint(current)));
-		}
-
-		if (get_next_node(current) != NULL) {
-			printf(" > ");
-		}
-
-		current = get_next_node(current);
-	}
-
-	printf("\n");
 }
