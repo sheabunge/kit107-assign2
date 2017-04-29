@@ -1,9 +1,10 @@
-// KIT107 Assignment 2: Flight Path
-
 /**
- * Implementation for Flight Path
- * @author Shea Bunge (407095)
- * @version 2016.04.26
+ * flight_path.c
+ *
+ * Implementation for a flight path
+ *
+ * @author  Shea Bunge (student 407095)
+ * @version 2016.04.29
  */
 
 #include <stdio.h>

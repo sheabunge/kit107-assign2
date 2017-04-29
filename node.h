@@ -1,6 +1,9 @@
 /**
+ * node.h
+ *
  * Definition for a node element in a flight path
- * @author Shea Bunge (407095)
+ *
+ * @author Shea Bunge (student 407095)
  * @version 2016.04.26
  */
 
