@@ -42,15 +42,6 @@ void init_flight_path(flight_path *path, waypoint origin, waypoint destination) 
 }
 
 /**
- * Check if a flight path contains any points
- * @param  path  the flight path to check
- * @return       true if there are no points, false otherwise
- */
-bool is_path_empty(flight_path path) {
-	return path->origin == NULL;
-}
-
-/**
  * Add an interim waypoint to the end of the flight path.
  * An error is generated if the flight path is empty.
  * @param path     the flight path to modify
@@ -61,7 +52,7 @@ void add_next(flight_path path, waypoint interim) {
 	init_node(&node, interim);
 
 	/* Ensure the path is not empty */
-	if (is_path_empty(path)) {
+	if (path->current == NULL) {
 		fprintf(stderr, "Cannot add an interim waypoint to an empty flight path.");
 	} else {
 
@@ -120,7 +111,7 @@ char *heading(flight_path path, bool holding) {
 	list_node node; // used to store the node where the desired waypoint name is stored
 	char *result;   // used to store the resulting heading - either the name of a waypoint, or an empty string
 
-	if (is_path_empty(path)) {
+	if (path->current == NULL) {
 
 		/* Ensure that the flight path is not empty, and print an error if so */
 		fprintf(stderr, "Cannot retrieve the heading from an empty flight path");
@@ -202,7 +193,7 @@ void skip(flight_path path) {
 	list_node next; // used to store the next waypoint, which is to be deleted
 
 	/* If there are no points in the flight path, print a message to the error stream */
-	if (is_path_empty(path)) {
+	if (path->current == NULL) {
 		fprintf(stderr, "Cannot remove a waypoint from an empty flight path.");
 	} else {
 
